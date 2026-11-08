@@ -1,0 +1,156 @@
+# Data Cleaning Report — Spotify EDA Project
+
+**Generated**: 2026-11-07  
+**Dataset**: Spotify Tracks (114,000 rows × 21 columns)  
+**Author**: Senior Data Science Team
+
+---
+
+## 1. Original Dataset Profile
+
+| Metric | Value |
+|--------|-------|
+| **Rows** | 114,000 |
+| **Columns** | 21 |
+| **Memory Usage** | ~25 MB |
+| **Duplicate track_ids** | 24,259 (21.3%) |
+| **Missing Values** | 3 total (1 each in artists, album_name, track_name) |
+
+---
+
+## 2. Issues Identified
+
+### 2.1 Unnamed Index Column
+- Column `Unnamed: 0` present (auto-generated index from CSV export)
+- No analytical value — dropped
+
+### 2.2 Missing Values
+| Column | Missing Count | Missing % | Action |
+|--------|---------------|-----------|--------|
+| artists | 1 | 0.001% | Drop row |
+| album_name | 1 | 0.001% | Drop row |
+| track_name | 1 | 0.001% | Drop row |
+
+**Decision**: Drop rows (3 total) — negligible impact, ensures referential integrity.
+
+### 2.3 Duplicate Track IDs
+- **24,259 duplicate `track_id` values** (multiple rows per track)
+- Likely caused by genre balancing (same track tagged with multiple genres) or data export artifact
+- **Decision**: Keep first occurrence per `track_id` (arbitrary but consistent)
+
+### 2.4 No Temporal Column
+- `release_date` column **absent** from dataset
+- Limits temporal trend analysis
+- **Documented** as known limitation
+
+### 2.5 Artist Name Format
+- `artists` column contains semicolon-separated names for collaborations
+- Requires parsing for artist-level analysis
+- **Handled** in advanced analysis section with split logic
+
+### 2.6 Genre Balance
+- 114 genres × ~1,000 tracks each = 114,000 (curated balanced dataset)
+- Not representative of real Spotify market distribution
+- **Flagged** for business interpretation caveat
+
+---
+
+## 3. Cleaning Steps Applied
+
+```python
+# 1. Load raw data
+df = pd.read_csv("data/spotify.csv")
+
+# 2. Drop unnamed index column
+if 'Unnamed: 0' in df.columns:
+    df = df.drop(columns=['Unnamed: 0'])
+
+# 3. Handle missing values in key identifier columns
+df = df.dropna(subset=['artists', 'album_name', 'track_name'])
+
+# 4. Remove duplicate track_ids (keep first)
+df = df.drop_duplicates(subset=['track_id'], keep='first')
+
+# 5. Feature engineering
+df['duration_min'] = df['duration_ms'] / 60000.0
+df['duration_sec'] = df['duration_ms'] / 1000.0
+
+# 6. Key mapping (0-11 → C, C#, D...)
+key_map = {0:'C', 1:'C#', 2:'D', 3:'D#', 4:'E', 5:'F', 
+           6:'F#', 7:'G', 8:'G#', 9:'A', 10:'A#', 11:'B'}
+df['key_name'] = df['key'].map(key_map)
+
+# 7. Mode mapping (0/1 → Minor/Major)
+df['mode_name'] = df['mode'].map({0:'Minor', 1:'Major'})
+
+# 8. Interaction feature: Danceability × Energy
+df['dance_energy_group'] = 'Low Both'
+df.loc[(df['danceability'] > 0.6) & (df['energy'] > 0.6), 'dance_energy_group'] = 'High Both'
+df.loc[(df['danceability'] > 0.6) & (df['energy'] <= 0.6), 'dance_energy_group'] = 'High Dance / Low Energy'
+df.loc[(df['danceability'] <= 0.6) & (df['energy'] > 0.6), 'dance_energy_group'] = 'Low Dance / High Energy'
+```
+
+---
+
+## 4. Before vs After Comparison
+
+| Metric | Before | After | Change |
+|--------|--------|-------|--------|
+| **Rows** | 114,000 | 89,740 | -24,260 (-21.3%) |
+| **Columns** | 21 | 24 | +3 (engineered) |
+| **Missing Values** | 3 | 0 | -3 |
+| **Duplicate track_ids** | 24,259 | 0 | -24,259 |
+| **Memory Usage** | ~25 MB | ~20 MB | -5 MB |
+
+---
+
+## 5. Post-Cleaning Data Quality
+
+- ✅ **Zero missing values** across all columns
+- ✅ **Zero duplicate track_ids** (unique primary key)
+- ✅ **114 genres** preserved with ~787 tracks each (post-dedup)
+- ✅ **Popularity range**: 0–100 (full scale)
+- ✅ **All audio features** in valid ranges (0–1 for normalized, dB for loudness)
+- ✅ **Explicit flag**: Boolean (91.7% False, 8.3% True)
+- ✅ **New features**: duration_min, key_name, mode_name, dance_energy_group
+
+---
+
+## 6. Data Quality Caveats for Downstream Analysis
+
+1. **Genre balance is artificial** — insights are *comparative across genres*, not *representative of market*
+2. **No temporal data** — cannot analyze trends over time, seasonal patterns, or genre evolution
+3. **Artist disambiguation needed** — semicolon format prevents clean artist-level aggregation without parsing
+4. **Popularity metric is proprietary** — Spotify's algorithm undisclosed; treat as relative ranking only
+5. **Audio features from ML model** — not ground truth measurements; inherent estimation error
+6. **Single snapshot** — no longitudinal view; cross-sectional only
+
+---
+
+## 7. Recommendations for Production Use
+
+| Priority | Action |
+|----------|--------|
+| High | Enrich with `release_date` via Spotify Web API `/tracks` endpoint |
+| High | Add market-share weights (real genre distribution) for business-representative insights |
+| Medium | Implement artist disambiguation using MusicBrainz/Spotify artist IDs |
+| Medium | Validate audio features against ground truth (manual spot-check) |
+| Low | Set up automated data refresh pipeline (weekly/monthly) |
+
+---
+
+## 8. Reproducibility
+
+All cleaning steps are encoded in:
+- `notebooks/spotify_eda.ipynb` (Section 3: Data Cleaning)
+- `build_eda_assets.py` (standalone script)
+
+Run with:
+```bash
+cd Spotify_Data_Analysis
+python build_eda_assets.py
+```
+
+---
+
+*End of Data Cleaning Report*
