@@ -49,7 +49,7 @@
 - **Handled** in advanced analysis section with split logic
 
 ### 2.6 Genre Balance
-- 114 genres × ~1,000 tracks each = 114,000 (curated balanced dataset)
+- 113 genres × ~1,000 tracks each in the raw dataset (curated balanced dataset)
 - Not representative of real Spotify market distribution
 - **Flagged** for business interpretation caveat
 
@@ -108,10 +108,10 @@ df.loc[(df['danceability'] <= 0.6) & (df['energy'] > 0.6), 'dance_energy_group']
 
 - ✅ **Zero missing values** across all columns
 - ✅ **Zero duplicate track_ids** (unique primary key)
-- ✅ **114 genres** preserved with ~787 tracks each (post-dedup)
+- ✅ **113 genres** preserved with ~794 tracks each (post-dedup)
 - ✅ **Popularity range**: 0–100 (full scale)
 - ✅ **All audio features** in valid ranges (0–1 for normalized, dB for loudness)
-- ✅ **Explicit flag**: Boolean (91.7% False, 8.3% True)
+- ✅ **Explicit flag**: Boolean (91.4% False, 8.6% True)
 - ✅ **New features**: duration_min, key_name, mode_name, dance_energy_group
 
 ---
