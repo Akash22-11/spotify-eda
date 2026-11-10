@@ -1,8 +1,8 @@
 # Executive Summary — Spotify Music EDA
 
-**Prepared For**: College Internship Project  
+**Prepared For**: Internship Review  
 **Date**: 2026-11-08  
-**Author**: College Internship Project
+**Author**: Student Intern
 
 ---
 

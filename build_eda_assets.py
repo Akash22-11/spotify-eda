@@ -456,75 +456,87 @@ plt.close()
 
 print("All static visual charts generated successfully.")
 
-# ─── Interactive Plotly Dashboard ───
+# ─── Interactive Plotly Dashboard (4 charts) ───
 print("Building interactive Plotly Dashboard...")
 
 fig_dash = make_subplots(
-    rows=3, cols=2,
+    rows=2, cols=2,
     subplot_titles=(
-        "Top 10 Genres by Average Popularity",
-        "Popularity vs Energy (1,000-track sample)",
-        "Audio Feature Correlations",
         "Popularity Distribution",
-        "Explicit Content Breakdown",
-        "Musical Key Distribution"
+        "Top 10 Genres by Count",
+        "Genre vs Popularity (Violin)",
+        "Danceability × Energy Interaction"
     ),
-    specs=[[{"type": "bar"}, {"type": "scatter"}],
-           [{"type": "heatmap"}, {"type": "histogram"}],
-           [{"type": "pie"}, {"type": "bar"}]]
+    specs=[[{"type": "histogram"}, {"type": "bar"}],
+           [{"type": "violin"}, {"type": "box"}]]
 )
 
-# Color scheme for dashboard (matches static charts)
-DASH_GREEN = SPOTIFY_GREEN
-DASH_BLUE = ACCENT_BLUE
-DASH_RED = ACCENT_RED
-DASH_TEAL = ACCENT_TEAL
-DASH_ORANGE = ACCENT_ORANGE
-
-# 1. Top 10 Genres Bar
-top_10_by_mean = df_clean.groupby('track_genre')['popularity'].mean().sort_values(ascending=False).head(10)
-fig_dash.add_trace(go.Bar(
-    x=top_10_by_mean.index, y=top_10_by_mean.values,
-    marker_color=SPOTIFY_GREEN, name="Avg popularity"), row=1, col=1)
-
-# 2. Scatter Energy vs Popularity
-dashboard_sample = df_clean.sample(1000, random_state=42)
-fig_dash.add_trace(go.Scatter(
-    x=dashboard_sample['energy'], y=dashboard_sample['popularity'],
-    mode='markers', marker=dict(color='#1ED760', opacity=0.5),
-    name="Tracks"), row=1, col=2)
-
-# 3. Correlation Heatmap
-fig_dash.add_trace(go.Heatmap(
-    z=corr_matrix.values, x=corr_matrix.columns, y=corr_matrix.index,
-    colorscale="Viridis", name="Correlation"), row=2, col=1)
-
-# 4. Popularity Histogram
+# 1. Popularity Distribution (Histogram)
 fig_dash.add_trace(go.Histogram(
-    x=df_clean['popularity'], nbinsx=30, marker_color=ACCENT_BLUE,
-    name="Tracks"), row=2, col=2)
+    x=df_clean['popularity'], nbinsx=30,
+    marker_color=SPOTIFY_GREEN, opacity=0.8,
+    name="Popularity",
+    hovertemplate='Popularity: %{x}<br>Count: %{y:,}<extra></extra>'),
+    row=1, col=1)
 
-# 5. Explicit Pie
-explicit_counts = df_clean['explicit'].value_counts()
-fig_dash.add_trace(go.Pie(
-    labels=["Clean", "Explicit"], values=explicit_counts.values,
-    marker_colors=[ACCENT_TEAL, ACCENT_RED], hole=0.45,
-    textinfo='label+percent', textposition='inside',
-    name="Explicit ratio"), row=3, col=1)
-
-# 6. Key Distribution
-KEY_NAMES = {0: "C", 1: "C#", 2: "D", 3: "D#", 4: "E", 5: "F", 6: "F#", 7: "G", 8: "G#", 9: "A", 10: "A#", 11: "B"}
-df_clean['key_name'] = df_clean['key'].map(KEY_NAMES)
-key_counts = df_clean['key_name'].value_counts().reindex(list(KEY_NAMES.values()), fill_value=0)
+# 2. Top 10 Genres by Count (Bar)
+top10_counts = df_clean['track_genre'].value_counts().head(10)
 fig_dash.add_trace(go.Bar(
-    x=key_counts.index, y=key_counts.values, marker_color=ACCENT_ORANGE,
-    name="Key count"), row=3, col=2)
+    x=top10_counts.values, y=top10_counts.index[::-1],
+    orientation='h', marker_color=SPOTIFY_GREEN,
+    name="Track count",
+    hovertemplate='%{y}: %{x:,} tracks<extra></extra>'),
+    row=1, col=2)
+
+# 3. Genre vs Popularity (Violin - top 10 genres)
+top10_genres = df_clean['track_genre'].value_counts().head(10).index
+df_top10 = df_clean[df_clean['track_genre'].isin(top10_genres)]
+for i, genre in enumerate(top10_genres):
+    genre_data = df_top10[df_top10['track_genre'] == genre]['popularity']
+    fig_dash.add_trace(go.Violin(
+        y=genre_data, name=genre, box_visible=True,
+        meanline_visible=True, scalegroup='genres',
+        line_color=CAT_PALETTE[i % len(CAT_PALETTE)],
+        fillcolor=CAT_PALETTE[i % len(CAT_PALETTE)],
+        opacity=0.6,
+        hovertemplate=f'{genre}<br>Popularity: %{{y}}<extra></extra>'),
+        row=2, col=1)
+
+# 4. Danceability × Energy Interaction (Box)
+if 'dance_energy_group' not in df_clean.columns:
+    df_clean['dance_energy_group'] = 'Low Both'
+    df_clean.loc[(df_clean['danceability'] > 0.6) & (df_clean['energy'] > 0.6), 'dance_energy_group'] = 'High Both'
+    df_clean.loc[(df_clean['danceability'] > 0.6) & (df_clean['energy'] <= 0.6), 'dance_energy_group'] = 'High Dance / Low Energy'
+    df_clean.loc[(df_clean['danceability'] <= 0.6) & (df_clean['energy'] > 0.6), 'dance_energy_group'] = 'Low Dance / High Energy'
+
+group_order = ['Low Both', 'High Dance / Low Energy', 'Low Dance / High Energy', 'High Both']
+group_colors = [NEUTRAL_MED, CAT_PALETTE[1], CAT_PALETTE[3], SPOTIFY_GREEN]
+
+for i, grp in enumerate(group_order):
+    grp_data = df_clean[df_clean['dance_energy_group'] == grp]['popularity']
+    fig_dash.add_trace(go.Box(
+        y=grp_data, name=grp,
+        marker_color=group_colors[i],
+        boxmean=True,
+        hovertemplate=f'{grp}<br>Popularity: %{{y}}<extra></extra>'),
+        row=2, col=2)
 
 # Layout
 fig_dash.update_layout(
-    title_text="<b>Spotify Music EDA — Interactive Dashboard</b>",
-    template="plotly_dark", height=1200, showlegend=False
+    title_text="<b>Spotify EDA — Internship Dashboard</b>",
+    template="plotly_white", height=900, showlegend=False,
+    font=dict(family='DejaVu Sans', size=11, color=NEUTRAL_DARK)
 )
+
+# Axis titles
+fig_dash.update_xaxes(title_text="Popularity Score (0–100)", row=1, col=1)
+fig_dash.update_yaxes(title_text="Count", row=1, col=1)
+fig_dash.update_xaxes(title_text="Track Count", row=1, col=2)
+fig_dash.update_yaxes(title_text="", row=1, col=2)
+fig_dash.update_xaxes(title_text="Genre", row=2, col=1)
+fig_dash.update_yaxes(title_text="Popularity Score (0–100)", row=2, col=1)
+fig_dash.update_xaxes(title_text="Dance/Energy Group", row=2, col=2)
+fig_dash.update_yaxes(title_text="Popularity Score (0–100)", row=2, col=2)
 
 dashboard_html_path = DASHBOARD_DIR / "spotify_dashboard.html"
 fig_dash.write_html(dashboard_html_path, include_plotlyjs='cdn',

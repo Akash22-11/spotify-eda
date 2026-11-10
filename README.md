@@ -4,6 +4,8 @@ An exploratory data analysis of 114,000 tracks from the Spotify Tracks Dataset, 
 
 For a concise overview of the findings, business implications, and recommended next steps, see the [Executive Summary](reports/executive_summary.md).
 
+> **Note on dataset balance**: The cleaned dataset contains ~794 tracks per genre (113 genres). This is a **balanced sample** designed for fair cross-genre comparison and **does not reflect Spotify's natural catalog distribution**. Apply market-share weights before generalizing insights.
+
 ---
 
 ## Key findings
@@ -84,6 +86,24 @@ For a concise overview of the findings, business implications, and recommended n
 
 ### Setup
 
+**Requirements**
+- Python ≥ 3.9
+- Dependencies in `requirements.txt` (pandas, numpy, matplotlib, seaborn, plotly, scipy, kaleido)
+
+**Folder layout**
+```
+spotify-eda/
+├── build_eda_assets.py    # Chart & dashboard generator
+├── requirements.txt
+├── data/
+│   └── spotify.csv        # Place the raw CSV here (114,000 tracks)
+├── notebooks/
+│   └── spotify_eda.ipynb  # Full EDA notebook
+├── visuals/               # Output: 10 PNG charts (300 DPI)
+├── dashboard/             # Output: spotify_dashboard.html
+└── reports/               # Output: 4 Markdown reports
+```
+
 ```bash
 # Clone the repository
 git clone https://github.com/Akash22-11/spotify-eda.git
@@ -97,13 +117,17 @@ source venv/bin/activate  # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### Run the build script
+### Regeneration
 
-Re-generates all 10 visual assets and the interactive dashboard:
+Run the build script to regenerate **all 10 static PNG charts** in `visuals/` and the **interactive Plotly dashboard** in `dashboard/`:
 
 ```bash
 python build_eda_assets.py
 ```
+
+Outputs created:
+- `visuals/01_popularity_distribution.png` through `10_top_genres_by_avg_popularity.png`
+- `dashboard/spotify_dashboard.html`
 
 ### Open the interactive dashboard
 

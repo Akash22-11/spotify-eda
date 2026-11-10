@@ -1,7 +1,7 @@
 # Business Insights Report — Spotify EDA Project
 
 **Generated**: 2026-11-08  
-**Audience**: Product, A&R, Marketing, Content Strategy, Executive Leadership  
+**Audience**: Internship Review  
 **Author**: Internship Project Team
 
 ---
@@ -10,7 +10,7 @@
 
 This report translates data-backed insights from the Spotify Tracks EDA into **actionable business recommendations**. Each insight includes the quantitative finding, business context, and specific recommended actions with ownership suggestions.
 
-**Critical Note**: The analysis reveals that **no single audio feature strongly predicts popularity** (max |r| ≈ 0.13, instrumentalness). The primary driver is **genre** (27× spread). Many conventional "hit-making" hypotheses (loudness, dance+energy, acousticness penalty) show only weak marginal effects in this balanced dataset. Streaming popularity is driven by genre, marketing, artist brand, and playlist placement — not by mastering louder or pushing danceability/energy.
+**Critical Note**: The analysis reveals that **no single audio feature strongly predicts popularity** (max |r| ≈ 0.13, instrumentalness). The primary driver is **genre** (27× spread). Many conventional "hit-making" hypotheses (loudness, dance+energy, acousticness penalty) show only weak marginal effects in this balanced dataset.
 
 ---
 
