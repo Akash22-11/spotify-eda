@@ -2,7 +2,6 @@
 
 **Generated**: 2026-11-08  
 **Audience**: Product, A&R, Marketing, Content Strategy, Executive Leadership  
-**Classification**: Internal — Strategic Intelligence  
 **Author**: Internship Project Team
 
 ---

@@ -1,9 +1,7 @@
 # Executive Summary — Spotify Music EDA
 
-<!-- CONFIDENTIALITY-FLAG -->  
 **Prepared For**: College Internship Project  
 **Date**: 2026-11-08  
-**Classification**: Confidential — Strategic Intelligence  
 **Author**: College Internship Project
 
 ---
