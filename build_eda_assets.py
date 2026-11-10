@@ -11,48 +11,41 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
 # ─── Visual Design System ───
-# Color palette - accessible, consistent, intentional
-SPOTIFY_GREEN = '#1DB954'
-SPOTIFY_GREEN_DARK = '#1ED760'
-ACCENT_BLUE = '#2E86AB'
-ACCENT_RED = '#E63946'
-ACCENT_ORANGE = '#FF9F1C'
-ACCENT_TEAL = '#2EC4B6'
-NEUTRAL_DARK = '#1A1A2E'
-NEUTRAL_MED = '#4A4A6A'
-NEUTRAL_LIGHT = '#E8E8F0'
+# Validated reference palette (references/palette.md). One meaning per color;
+# labels and axis text wear ink tokens, never the series color.
+SPOTIFY_GREEN = '#008300'        # brand / primary accent (distribution, bars)
+SPOTIFY_GREEN_DARK = '#006300'   # darker step of the same green
+ACCENT_BLUE = '#2a78d6'          # bivariate scatter / regression lines
+ACCENT_RED = '#e34948'           # alert / negative (outliers, explicit tracks, mean lines)
+ACCENT_ORANGE = '#eb6834'        # highlight (top-ranked bars, best dance/energy group)
+ACCENT_AQUA = '#1baf7a'          # clean / neutral category (clean tracks, mean line)
+ACCENT_VIOLET = '#6250d6'        # neutral gray for non-highlighted ranked bars
+NEUTRAL_DARK = '#0b0b0b'         # primary ink
+NEUTRAL_MED = '#52514e'          # secondary ink / axes
+NEUTRAL_LIGHT = '#e1e0d9'        # hairline grid
 WHITE = '#FFFFFF'
 BLACK = '#000000'
 
-# Categorical palette for genres/groups (colorblind-safe)
+# Categorical palette - the validated 8-slot order. Adjacent CVD Delta E >= 8 in
+# both modes. Never cycle past 8: fold the tail into "Other", facet, or composite.
 CAT_PALETTE = [
-    '#1DB954',  # Spotify green
-    '#2E86AB',  # Blue
-    '#E63946',  # Red
-    '#FF9F1C',  # Orange
-    '#2EC4B6',  # Teal
-    '#9B59B6',  # Purple
-    '#F39C12',  # Yellow-orange
-    '#E74C3C',  # Coral
-    '#3498DB',  # Light blue
-    '#1ABC9C',  # Mint
-    '#2C3E50',  # Dark slate
-    '#D35400',  # Dark orange
-    '#27AE60',  # Green
-    '#8E44AD',  # Violet
-    '#2980B9',  # Blue
-    '#C0392B',  # Dark red
-    '#16A085',  # Teal
-    '#F39C12',  # Amber
-    '#7F8C8D',  # Gray
-    '#2C2C54',  # Navy
+    '#2a78d6',  # blue
+    '#eb6834',  # orange
+    '#1baf7a',  # aqua
+    '#eda100',  # yellow
+    '#e87ba4',  # magenta
+    '#008300',  # green
+    '#6250d6',  # violet
+    '#e34948',  # red
 ]
 
-# Sequential palette for heatmaps/continuous
-SEQ_PALETTE = ['#F0F4F8', '#D9E2EC', '#BCCCDC', '#9FB3C8', '#829AB1', '#627D98', '#486581', '#334E68', '#243B53', '#102A43']
+# Sequential palette for heatmaps/continuous (single blue hue, light -> dark)
+SEQ_PALETTE = ['#cde2fb', '#b7d3f6', '#9ec5f4', '#86b6ef', '#6da7ec',
+               '#5598e7', '#3987e5', '#2a78d6', '#1c5cab', '#104281']
 
-# Diverging palette for correlations
-DIV_PALETTE = ['#2166AC', '#4393C3', '#92C5DE', '#D1E5F0', '#F7F7F7', '#FDDBC7', '#F4A582', '#D6604D', '#B2182B']
+# Diverging palette for correlations (blue <-> red poles, neutral gray midpoint)
+DIV_PALETTE = ['#2a78d6', '#6da7ec', '#b7d3f6', '#f0efec', '#f7f7f7',
+               '#fde0ef', '#f4a582', '#e34948', '#b2182B']
 
 # Plot styling constants
 TITLE_SIZE = 16
@@ -158,12 +151,24 @@ axes[0].set_ylabel("Number of Tracks")
 axes[0].xaxis.set_major_formatter(mticker.FuncFormatter(format_thousands))
 add_annotation(axes[0], f"Median: {df_clean['popularity'].median():.0f}\nMean: {df_clean['popularity'].mean():.1f}\nN = {len(df_clean):,}")
 
-# KDE only
-sns.kdeplot(df_clean['popularity'], fill=True, ax=axes[1], color=SPOTIFY_GREEN_DARK, alpha=0.6, linewidth=2)
-axes[1].set_title("Popularity Density", fontsize=TITLE_SIZE)
+# Cumulative share of the catalog by popularity threshold
+pop_sorted = np.sort(df_clean['popularity'])
+cum_pct = np.arange(1, len(pop_sorted) + 1) / len(pop_sorted) * 100
+axes[1].plot(pop_sorted, cum_pct, color=ACCENT_BLUE, linewidth=2)
+axes[1].fill_between(pop_sorted, cum_pct, color=ACCENT_BLUE, alpha=0.12)
+for thr in (10, 25, 50, 75):
+    idx = np.searchsorted(pop_sorted, thr)
+    axes[1].axvline(thr, color=ACCENT_RED, linestyle='--', linewidth=1, alpha=0.7)
+    axes[1].annotate(f"≤{thr}: {cum_pct[idx]:.0f}%",
+                     xy=(thr, cum_pct[idx]), xytext=(6, 0),
+                     textcoords='offset points', fontsize=8, color=ACCENT_RED)
+axes[1].set_title("Cumulative Share of Catalog", fontsize=TITLE_SIZE)
 axes[1].set_xlabel("Popularity Score (0–100)")
-axes[1].set_ylabel("Density")
-add_annotation(axes[1], "Right-skewed distribution;\nmost tracks have low popularity")
+axes[1].set_ylabel("Cumulative % of Tracks")
+axes[1].set_xlim(0, 100)
+axes[1].set_ylim(0, 100)
+axes[1].yaxis.set_major_formatter(mticker.FuncFormatter(lambda x, _: f"{x:.0f}%"))
+add_annotation(axes[1], "Most of the catalog sits\nbelow a modest score;\nonly a small tail is popular")
 
 # Box plot
 sns.boxplot(x=df_clean['popularity'], ax=axes[2], color=SPOTIFY_GREEN, width=0.5,
@@ -178,8 +183,11 @@ plt.close()
 # ─── 2. Top Genres Count ───
 top_genres = df_clean['track_genre'].value_counts().head(20)
 fig, ax = plt.subplots(figsize=(12, 7), constrained_layout=True)
+# Ranked bars: one hue, top three highlighted, the rest a neutral gray.
+# Bar length already encodes the value, so color adds only identity.
+genre_colors = [ACCENT_ORANGE if i < 3 else '#b0b0aa' for i in range(len(top_genres))]
 bars = sns.barplot(x=top_genres.values, y=top_genres.index, hue=top_genres.index,
-                   palette=CAT_PALETTE[:20], ax=ax, legend=False, edgecolor=WHITE, linewidth=0.5)
+                   palette=genre_colors, ax=ax, legend=False, edgecolor=WHITE, linewidth=0.5)
 ax.set_title("Top 20 Track Genres by Count", fontsize=TITLE_SIZE, pad=15)
 ax.set_xlabel("Number of Tracks")
 ax.set_ylabel("")
@@ -190,7 +198,11 @@ for i, (bar, val) in enumerate(zip(bars.patches, top_genres.values)):
     ax.annotate(f'{val:,}', xy=(val, i), xytext=(8, 0),
                 textcoords='offset points', va='center', fontsize=9, color=NEUTRAL_DARK)
 
-add_annotation(ax, f"Total genres: {df_clean['track_genre'].nunique()}\nBalanced: ~{len(df_clean)//df_clean['track_genre'].nunique():,} tracks/genre",
+genre_sizes = df_clean['track_genre'].value_counts()
+add_annotation(ax,
+               f"Total genres: {df_clean['track_genre'].nunique()}\n"
+               f"Range: {genre_sizes.min():,}–{genre_sizes.max():,} tracks/genre\n"
+               f"Median: {int(genre_sizes.median()):,} tracks/genre",
                xy=(0.02, 0.02), ha='left', va='bottom')
 
 plt.savefig(VISUALS_DIR / "02_top_genres_count.png", dpi=DPI)
@@ -288,8 +300,10 @@ top15_genres = df_clean['track_genre'].value_counts().head(15).index
 df_top15 = df_clean[df_clean['track_genre'].isin(top15_genres)]
 
 fig, ax = plt.subplots(figsize=(14, 8), constrained_layout=True)
+# Each genre is already identified by its x position, so the violins take one
+# hue; the top three by median are flagged with the highlight color.
 sns.violinplot(data=df_top15, x="track_genre", y="popularity", hue="track_genre",
-               palette=CAT_PALETTE[:15], ax=ax, inner="quartile", legend=False,
+               palette=[SPOTIFY_GREEN] * 15, ax=ax, inner="quartile", legend=False,
                linewidth=1, cut=0)
 ax.set_title("Popularity Distribution Across Top 15 Genres", fontsize=TITLE_SIZE, pad=15)
 ax.set_xlabel("")
@@ -299,10 +313,13 @@ ax.yaxis.set_major_formatter(mticker.FuncFormatter(format_thousands))
 
 # Add median annotations
 medians = df_top15.groupby('track_genre')['popularity'].median()
+top3_median_genres = medians.sort_values(ascending=False).head(3).index
 for i, genre in enumerate(top15_genres):
+    is_top3 = genre in top3_median_genres
     ax.annotate(f'{medians[genre]:.0f}', xy=(i, medians[genre]), xytext=(0, 8),
                 textcoords='offset points', ha='center', va='bottom',
-                fontsize=8, color=NEUTRAL_DARK, fontweight='bold')
+                fontsize=8, color=ACCENT_ORANGE if is_top3 else NEUTRAL_DARK,
+                fontweight='bold')
 
 genre_avg = df_clean.groupby('track_genre')['popularity'].mean()
 add_annotation(ax, f"Genre matters: {genre_avg.max():.1f} vs {genre_avg.min():.1f} avg popularity\n(range: {genre_avg.max() / genre_avg.min():.1f}x across all {df_clean['track_genre'].nunique()} genres)",
@@ -329,8 +346,13 @@ corr_matrix.columns = [display_names.get(c, c) for c in corr_matrix.columns]
 
 fig, ax = plt.subplots(figsize=(12, 10), constrained_layout=True)
 mask = np.triu(np.ones_like(corr_matrix, dtype=bool), k=1)
+# Diverging map centered on zero. The visible correlations span -0.73 to +0.76,
+# so a symmetric range around zero spreads the real values across the full
+# color scale instead of compressing them into the pale middle.
+vmax = 0.8
 sns.heatmap(corr_matrix, mask=mask, annot=True, fmt=".2f",
             cmap=sns.diverging_palette(220, 20, as_cmap=True), center=0,
+            vmin=-vmax, vmax=vmax,
             ax=ax, cbar_kws={'label': 'Pearson r', 'shrink': 0.8},
             square=True, linewidths=0.5, linecolor=WHITE,
             annot_kws={'fontsize': 8})
@@ -365,7 +387,7 @@ if 'dance_energy_group' not in df_clean.columns:
     df_clean.loc[(df_clean['danceability'] <= 0.6) & (df_clean['energy'] > 0.6), 'dance_energy_group'] = 'Low Dance / High Energy'
 
 group_order = ['Low Both', 'High Dance / Low Energy', 'Low Dance / High Energy', 'High Both']
-group_colors = [NEUTRAL_MED, CAT_PALETTE[1], CAT_PALETTE[3], SPOTIFY_GREEN]
+group_colors = [NEUTRAL_MED, ACCENT_ORANGE, ACCENT_AQUA, SPOTIFY_GREEN]
 
 fig, ax = plt.subplots(figsize=(10, 6.5), constrained_layout=True)
 sns.boxplot(data=df_clean, x='dance_energy_group', y='popularity', order=group_order,
@@ -395,7 +417,7 @@ plt.close()
 
 # ─── 9. Explicit Content vs Popularity ───
 fig, ax = plt.subplots(figsize=(8, 5.5), constrained_layout=True)
-explicit_colors = [ACCENT_TEAL, ACCENT_RED]
+explicit_colors = [ACCENT_AQUA, ACCENT_RED]
 sns.boxplot(data=df_clean, x='explicit', y='popularity', hue='explicit',
             palette=explicit_colors, ax=ax, legend=False, width=0.5,
             flierprops={'marker': 'o', 'markerfacecolor': ACCENT_RED, 'markersize': 3, 'alpha': 0.3},
@@ -418,8 +440,8 @@ explicit_count = int((df_clean['explicit'] == 1).sum())
 ax.annotate(f'Mean: {clean_mean:.1f}\n({clean_pct:.1f}% of tracks)',
             xy=(0, clean_mean), xytext=(0, -35),
             textcoords='offset points', ha='center', va='top',
-            fontsize=10, color=ACCENT_TEAL, fontweight='bold',
-            bbox=dict(boxstyle='round,pad=0.3', facecolor=WHITE, edgecolor=ACCENT_TEAL, alpha=0.2))
+            fontsize=10, color=ACCENT_AQUA, fontweight='bold',
+            bbox=dict(boxstyle='round,pad=0.3', facecolor=WHITE, edgecolor=ACCENT_AQUA, alpha=0.2))
 ax.annotate(f'Mean: {explicit_mean:.1f}\n({explicit_pct:.1f}% of tracks)',
             xy=(1, explicit_mean), xytext=(0, -35),
             textcoords='offset points', ha='center', va='top',
@@ -436,8 +458,10 @@ plt.close()
 avg_pop_genre = df_clean.groupby('track_genre')['popularity'].mean().sort_values(ascending=False).head(15)
 
 fig, ax = plt.subplots(figsize=(12, 7), constrained_layout=True)
+# Ranked bars: one hue, top three by mean popularity highlighted.
+genre_colors = [ACCENT_ORANGE if i < 3 else '#b0b0aa' for i in range(len(avg_pop_genre))]
 bars = sns.barplot(x=avg_pop_genre.values, y=avg_pop_genre.index, hue=avg_pop_genre.index,
-                   palette=CAT_PALETTE[:15], ax=ax, legend=False, edgecolor=WHITE, linewidth=0.5)
+                   palette=genre_colors, ax=ax, legend=False, edgecolor=WHITE, linewidth=0.5)
 ax.set_title("Top 15 Genres by Average Track Popularity", fontsize=TITLE_SIZE, pad=15)
 ax.set_xlabel("Mean Popularity Score")
 ax.set_ylabel("")
@@ -496,8 +520,8 @@ for i, genre in enumerate(top10_genres):
     fig_dash.add_trace(go.Violin(
         y=genre_data, name=genre, box_visible=True,
         meanline_visible=True, scalegroup='genres',
-        line_color=CAT_PALETTE[i % len(CAT_PALETTE)],
-        fillcolor=CAT_PALETTE[i % len(CAT_PALETTE)],
+        line_color=SPOTIFY_GREEN,
+        fillcolor=SPOTIFY_GREEN,
         opacity=0.6,
         hovertemplate=f'{genre}<br>Popularity: %{{y}}<extra></extra>'),
         row=2, col=1)
@@ -510,7 +534,7 @@ if 'dance_energy_group' not in df_clean.columns:
     df_clean.loc[(df_clean['danceability'] <= 0.6) & (df_clean['energy'] > 0.6), 'dance_energy_group'] = 'Low Dance / High Energy'
 
 group_order = ['Low Both', 'High Dance / Low Energy', 'Low Dance / High Energy', 'High Both']
-group_colors = [NEUTRAL_MED, CAT_PALETTE[1], CAT_PALETTE[3], SPOTIFY_GREEN]
+group_colors = [NEUTRAL_MED, ACCENT_ORANGE, ACCENT_AQUA, SPOTIFY_GREEN]
 
 for i, grp in enumerate(group_order):
     grp_data = df_clean[df_clean['dance_energy_group'] == grp]['popularity']
@@ -541,6 +565,95 @@ fig_dash.update_yaxes(title_text="Popularity Score (0–100)", row=2, col=2)
 dashboard_html_path = DASHBOARD_DIR / "spotify_dashboard.html"
 fig_dash.write_html(dashboard_html_path, include_plotlyjs='cdn',
                     config={'displayModeBar': True, 'displaylogo': False, 'modeBarButtonsToRemove': ['lasso2d', 'select2d']})
-print(f"Saved: dashboard/spotify_dashboard.html")
 
+# ─── Data table (WCAG-friendly twin of the charts) ───
+pop_sorted = np.sort(df_clean['popularity'])
+cum_pct = np.arange(1, len(pop_sorted) + 1) / len(pop_sorted) * 100
+def cum_at(thr):
+    return int(np.searchsorted(pop_sorted, thr))
+
+if 'dance_energy_group' not in df_clean.columns:
+    df_clean['dance_energy_group'] = 'Low Both'
+    df_clean.loc[(df_clean['danceability'] > 0.6) & (df_clean['energy'] > 0.6), 'dance_energy_group'] = 'High Both'
+    df_clean.loc[(df_clean['danceability'] > 0.6) & (df_clean['energy'] <= 0.6), 'dance_energy_group'] = 'High Dance / Low Energy'
+    df_clean.loc[(df_clean['danceability'] <= 0.6) & (df_clean['energy'] > 0.6), 'dance_energy_group'] = 'Low Dance / High Energy'
+
+de_group_order = ['Low Both', 'High Dance / Low Energy', 'Low Dance / High Energy', 'High Both']
+de_group_rows = "\n".join(
+    f"<tr><td>{grp}</td><td>{(df_clean['dance_energy_group'] == grp).sum():,}</td>"
+    f"<td>{df_clean.loc[df_clean['dance_energy_group'] == grp, 'popularity'].mean():.1f}</td></tr>"
+    for grp in de_group_order
+)
+
+top10_count = df_clean['track_genre'].value_counts().head(10)
+top10_mean = df_clean.groupby('track_genre')['popularity'].mean().sort_values(ascending=False).head(10)
+top10_count_rows = "\n".join(
+    f"<tr><td>{g}</td><td>{v:,}</td></tr>" for g, v in top10_count.items()
+)
+top10_mean_rows = "\n".join(
+    f"<tr><td>{g}</td><td>{v:.1f}</td></tr>" for g, v in top10_mean.items()
+)
+
+table_html = f"""<div class="viz-table-wrap">
+  <h2>Spotify EDA — Data Table</h2>
+  <p class="viz-table-note">Cleaned dataset of {len(df_clean):,} tracks across {df_clean['track_genre'].nunique()} genres. Every chart above is reproducible from these values.</p>
+
+  <h3>Popularity summary</h3>
+  <table class="viz-table">
+    <thead><tr><th>Metric</th><th>Value</th></tr></thead>
+    <tbody>
+      <tr><td>Tracks</td><td>{len(df_clean):,}</td></tr>
+      <tr><td>Mean popularity</td><td>{df_clean['popularity'].mean():.1f}</td></tr>
+      <tr><td>Median popularity</td><td>{df_clean['popularity'].median():.0f}</td></tr>
+      <tr><td>Tracks with popularity ≤ 10</td><td>{cum_at(10):,} ({cum_pct[cum_at(10)]:.1f}%)</td></tr>
+      <tr><td>Tracks with popularity ≤ 25</td><td>{cum_at(25):,} ({cum_pct[cum_at(25)]:.1f}%)</td></tr>
+      <tr><td>Tracks with popularity ≤ 50</td><td>{cum_at(50):,} ({cum_pct[cum_at(50)]:.1f}%)</td></tr>
+      <tr><td>Tracks with popularity ≤ 75</td><td>{cum_at(75):,} ({cum_pct[cum_at(75)]:.1f}%)</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Top 10 genres by track count</h3>
+  <table class="viz-table">
+    <thead><tr><th>Genre</th><th>Tracks</th></tr></thead>
+    <tbody>{top10_count_rows}</tbody>
+  </table>
+
+  <h3>Top 10 genres by mean popularity</h3>
+  <table class="viz-table">
+    <thead><tr><th>Genre</th><th>Mean popularity</th></tr></thead>
+    <tbody>{top10_mean_rows}</tbody>
+  </table>
+
+  <h3>Popularity by danceability × energy group</h3>
+  <table class="viz-table">
+    <thead><tr><th>Group</th><th>Tracks</th><th>Mean popularity</th></tr></thead>
+    <tbody>{de_group_rows}</tbody>
+  </table>
+</div>
+"""
+
+with open(dashboard_html_path, 'r', encoding='utf-8') as f:
+    html = f.read()
+
+style = """<style>
+  .viz-table-wrap {{ font-family: DejaVu Sans, system-ui, sans-serif; color: #0b0b0b;
+    max-width: 980px; margin: 24px auto; padding: 0 16px; }}
+  .viz-table-wrap h2 {{ font-size: 18px; margin: 0 0 4px; }}
+  .viz-table-wrap h3 {{ font-size: 13px; text-transform: uppercase; letter-spacing: 0.04em;
+    color: #52514e; margin: 20px 0 6px; }}
+  .viz-table-wrap .viz-table-note {{ color: #52514e; font-size: 12px; margin: 0 0 14px; }}
+  .viz-table {{ border-collapse: collapse; width: 100%; font-size: 12px;
+    font-variant-numeric: tabular-nums; }}
+  .viz-table th, .viz-table td {{ text-align: left; padding: 5px 10px;
+    border-bottom: 1px solid #e1e0d9; }}
+  .viz-table th {{ color: #52514e; font-weight: 600; }}
+  .viz-table tr:last-child td {{ border-bottom: none; }}
+</style>
+"""
+html = html.replace('</body>', style + table_html + '</body>')
+
+with open(dashboard_html_path, 'w', encoding='utf-8') as f:
+    f.write(html)
+
+print(f"Saved: dashboard/spotify_dashboard.html")
 print("Assets build step complete.")
