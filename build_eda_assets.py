@@ -463,7 +463,7 @@ fig_dash = make_subplots(
     rows=3, cols=2,
     subplot_titles=(
         "Top 10 Genres by Average Popularity",
-        "Popularity vs Energy (Sample)",
+        "Popularity vs Energy (1,000-track sample)",
         "Audio Feature Correlations",
         "Popularity Distribution",
         "Explicit Content Breakdown",
@@ -471,9 +471,7 @@ fig_dash = make_subplots(
     ),
     specs=[[{"type": "bar"}, {"type": "scatter"}],
            [{"type": "heatmap"}, {"type": "histogram"}],
-           [{"type": "pie"}, {"type": "bar"}]],
-    vertical_spacing=0.08,
-    horizontal_spacing=0.08,
+           [{"type": "pie"}, {"type": "bar"}]]
 )
 
 # Color scheme for dashboard (matches static charts)
@@ -484,112 +482,53 @@ DASH_TEAL = ACCENT_TEAL
 DASH_ORANGE = ACCENT_ORANGE
 
 # 1. Top 10 Genres Bar
-top10_pop_g = df_clean.groupby('track_genre')['popularity'].mean().sort_values(ascending=False).head(10)
+top_10_by_mean = df_clean.groupby('track_genre')['popularity'].mean().sort_values(ascending=False).head(10)
 fig_dash.add_trace(go.Bar(
-    x=top10_pop_g.values, y=top10_pop_g.index[::-1],  # reverse for horizontal
-    orientation='h', marker_color=DASH_GREEN, name="Avg Popularity",
-    hovertemplate='<b>%{y}</b><br>Avg Popularity: %{x:.1f}<extra></extra>',
-    showlegend=False
-), row=1, col=1)
+    x=top_10_by_mean.index, y=top_10_by_mean.values,
+    marker_color=SPOTIFY_GREEN, name="Avg popularity"), row=1, col=1)
 
 # 2. Scatter Energy vs Popularity
-sample_dash = df_clean.sample(1500, random_state=42)
+dashboard_sample = df_clean.sample(1000, random_state=42)
 fig_dash.add_trace(go.Scatter(
-    x=sample_dash['energy'], y=sample_dash['popularity'],
-    mode='markers', marker=dict(color=DASH_BLUE, opacity=0.4, size=6, line=dict(width=0)),
-    name="Tracks", hovertemplate='Energy: %{x:.2f}<br>Popularity: %{y}<extra></extra>',
-    showlegend=False
-), row=1, col=2)
-# Add trend line
-from scipy import stats
-slope, intercept, r_val, _, _ = stats.linregress(sample_dash['energy'], sample_dash['popularity'])
-x_trend = np.linspace(sample_dash['energy'].min(), sample_dash['energy'].max(), 100)
-y_trend = slope * x_trend + intercept
-fig_dash.add_trace(go.Scatter(
-    x=x_trend, y=y_trend, mode='lines',
-    line=dict(color=DASH_RED, width=3),
-    name=f'Trend (r={r_val:.3f})',
-    hoverinfo='skip', showlegend=True
-), row=1, col=2)
+    x=dashboard_sample['energy'], y=dashboard_sample['popularity'],
+    mode='markers', marker=dict(color='#1ED760', opacity=0.5),
+    name="Tracks"), row=1, col=2)
 
 # 3. Correlation Heatmap
 fig_dash.add_trace(go.Heatmap(
-    z=corr_matrix.values,
-    x=corr_matrix.columns, y=corr_matrix.index,
-    colorscale='RdBu', zmid=0, zmin=-1, zmax=1,
-    colorbar=dict(title='Pearson r', thickness=15, len=0.8),
-    hovertemplate='<b>%{y} vs %{x}</b><br>r = %{z:.3f}<extra></extra>',
-    showscale=True
-), row=2, col=1)
+    z=corr_matrix.values, x=corr_matrix.columns, y=corr_matrix.index,
+    colorscale="Viridis", name="Correlation"), row=2, col=1)
 
 # 4. Popularity Histogram
 fig_dash.add_trace(go.Histogram(
-    x=df_clean['popularity'], nbinsx=30,
-    marker_color=DASH_BLUE, opacity=0.8,
-    hovertemplate='Popularity: %{x}<br>Count: %{y:,}<extra></extra>',
-    showlegend=False
-), row=2, col=2)
+    x=df_clean['popularity'], nbinsx=30, marker_color=ACCENT_BLUE,
+    name="Tracks"), row=2, col=2)
 
 # 5. Explicit Pie
 explicit_counts = df_clean['explicit'].value_counts()
 fig_dash.add_trace(go.Pie(
-    labels=['Clean', 'Explicit'], values=explicit_counts.values,
-    marker_colors=[DASH_TEAL, DASH_RED],
-    hole=0.45, textinfo='label+percent', textposition='inside',
-    hovertemplate='<b>%{label}</b><br>%{value:,} tracks (%{percent})<extra></extra>',
-    showlegend=False
-), row=3, col=1)
+    labels=["Clean", "Explicit"], values=explicit_counts.values,
+    marker_colors=[ACCENT_TEAL, ACCENT_RED], hole=0.45,
+    textinfo='label+percent', textposition='inside',
+    name="Explicit ratio"), row=3, col=1)
 
 # 6. Key Distribution
-key_map = {0:'C', 1:'C♯', 2:'D', 3:'D♯', 4:'E', 5:'F', 6:'F♯', 7:'G', 8:'G♯', 9:'A', 10:'A♯', 11:'B'}
-df_clean['key_name'] = df_clean['key'].map(key_map)
-key_counts = df_clean['key_name'].value_counts().reindex(list(key_map.values()), fill_value=0)
+KEY_NAMES = {0: "C", 1: "C#", 2: "D", 3: "D#", 4: "E", 5: "F", 6: "F#", 7: "G", 8: "G#", 9: "A", 10: "A#", 11: "B"}
+df_clean['key_name'] = df_clean['key'].map(KEY_NAMES)
+key_counts = df_clean['key_name'].value_counts().reindex(list(KEY_NAMES.values()), fill_value=0)
 fig_dash.add_trace(go.Bar(
-    x=key_counts.index, y=key_counts.values,
-    marker_color=DASH_ORANGE, name="Key Count",
-    hovertemplate='<b>%{x}</b><br>%{y:,} tracks<extra></extra>',
-    showlegend=False
-), row=3, col=2)
+    x=key_counts.index, y=key_counts.values, marker_color=ACCENT_ORANGE,
+    name="Key count"), row=3, col=2)
 
-# Layout updates
+# Layout
 fig_dash.update_layout(
-    title=dict(
-        text="<b>Spotify Tracks — Exploratory Data Analysis Dashboard</b>",
-        font=dict(size=20, color=NEUTRAL_DARK, family='Arial, sans-serif'),
-        x=0.5, xanchor='center',
-        pad=dict(t=10, b=10)
-    ),
-    template="plotly_white",
-    height=1100,
-    margin=dict(l=60, r=60, t=80, b=50),
-    font=dict(family='Arial, sans-serif', size=11, color=NEUTRAL_DARK),
-    showlegend=True,
-    legend=dict(
-        orientation='h', yanchor='bottom', y=1.02, xanchor='center', x=0.5,
-        font=dict(size=10), bgcolor='rgba(255,255,255,0.8)', bordercolor=NEUTRAL_LIGHT, borderwidth=1
-    ),
-    hoverlabel=dict(bgcolor=WHITE, font_size=11, font_family='Arial, sans-serif'),
+    title_text="<b>Spotify Music EDA — Interactive Dashboard</b>",
+    template="plotly_dark", height=1200, showlegend=False
 )
-
-# Axis styling
-fig_dash.update_xaxes(gridcolor=NEUTRAL_LIGHT, zerolinecolor=NEUTRAL_LIGHT,
-                      title_font=dict(size=11), tickfont=dict(size=10))
-fig_dash.update_yaxes(gridcolor=NEUTRAL_LIGHT, zerolinecolor=NEUTRAL_LIGHT,
-                      title_font=dict(size=11), tickfont=dict(size=10))
-
-# Specific axis titles
-fig_dash.update_xaxes(title_text="Avg Popularity", row=1, col=1)
-fig_dash.update_yaxes(title_text="", row=1, col=1)
-fig_dash.update_xaxes(title_text="Energy", row=1, col=2)
-fig_dash.update_yaxes(title_text="Popularity", row=1, col=2)
-fig_dash.update_xaxes(title_text="Popularity", row=2, col=2)
-fig_dash.update_yaxes(title_text="Count", row=2, col=2)
-fig_dash.update_xaxes(title_text="Musical Key", row=3, col=2)
-fig_dash.update_yaxes(title_text="Track Count", row=3, col=2)
 
 dashboard_html_path = DASHBOARD_DIR / "spotify_dashboard.html"
 fig_dash.write_html(dashboard_html_path, include_plotlyjs='cdn',
                     config={'displayModeBar': True, 'displaylogo': False, 'modeBarButtonsToRemove': ['lasso2d', 'select2d']})
-print(f"Interactive Dashboard saved to {dashboard_html_path}")
+print(f"Saved: dashboard/spotify_dashboard.html")
 
 print("Assets build step complete.")
