@@ -1,18 +1,23 @@
 # Executive Summary — Spotify Music EDA
 
-**Prepared For**: Spotify Management Team / Stakeholders  
+<!-- CONFIDENTIALITY-FLAG -->  
+**Prepared For**: College Internship Project  
 **Date**: 2026-11-08  
 **Classification**: Confidential — Strategic Intelligence  
-**Author**: Senior Data Science Team
+**Author**: College Internship Project
 
 ---
 
 ## 🎯 One-Page Summary
 
 **What we analyzed**: 89,740 Spotify tracks across 113 genres (balanced sample)  
-**What we found**: **No single audio feature strongly predicts popularity** (max |r| = 0.13). **Genre is the dominant factor** — average popularity ranges 27× from K-pop (~59) to Iranian (~2). The "High Dance + High Energy = Hit Zone" hypothesis is not supported (+5.8% lift, not 23%).  
+**What we found**: **No single audio feature strongly predicts popularity** (max |r| ≈ 0.13, instrumentalness). **Genre is the dominant factor** — average popularity ranges 27× from K-pop (~59) to Iranian (~2). The "High Dance + High Energy = Hit Zone" hypothesis is not supported (+5.8% lift, not 23%).  
 **What it means**: Streaming popularity is driven by genre, marketing, artist brand, and playlist placement — not by mastering louder or pushing danceability/energy. Acoustic/instrumental tracks are modestly disadvantaged but can succeed via functional verticals (sync, wellness).  
 **What to do**: Enrich with release dates, build genre-normalized KPIs, retire audio-feature-based A&R signals, strengthen functional audio verticals.
+
+> ⚠️ **Limitations**  
+> - **Balanced-genre sample** (~794 tracks/genre) — insights are *comparative across genres*, not *representative of the real Spotify market*. Apply market-share weights before executive reporting.  
+> - **No `release_date` column** — the dataset is a single cross-sectional snapshot, so it cannot support trend, seasonality, or genre-evolution analysis.
 
 ---
 
@@ -20,7 +25,7 @@
 
 | # | Finding | Evidence | Business Impact |
 |---|---------|----------|-----------------|
-| 1 | **No audio feature strongly predicts popularity** | Loudness r=+0.07 (max of 12 features) | Retire loudness/energy/danceability as A&R signals |
+| 1 | **No audio feature strongly predicts popularity** | Max |r| ≈ 0.13 (instrumentalness); loudness r=+0.07 | Retire loudness/energy/danceability as A&R signals |
 | 2 | **"High Dance + High Energy" is not a special Hit Zone** | +5.8% lift; "High Dance / Low Energy" +11.8% | Don't prioritize "High-High" for playlist pitching |
 | 3 | **Genre baseline gap: 27×** | K-pop 59.4 vs Iranian 2.2 avg popularity | Genre-normalized KPIs essential; uniform thresholds unfair |
 | 4 | **Acoustic/Instrumental modestly penalized** | r = -0.04, -0.13 respectively | Niche verticals (sync, wellness, functional audio) viable path |

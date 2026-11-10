@@ -2,7 +2,8 @@
 
 **Generated**: 2026-11-08  
 **Audience**: Product, A&R, Marketing, Content Strategy, Executive Leadership  
-**Classification**: Internal — Strategic Intelligence
+**Classification**: Internal — Strategic Intelligence  
+**Author**: Internship Project Team
 
 ---
 
@@ -10,15 +11,13 @@
 
 This report translates data-backed insights from the Spotify Tracks EDA into **actionable business recommendations**. Each insight includes the quantitative finding, business context, and specific recommended actions with ownership suggestions.
 
-**Critical Note**: The analysis reveals that **no single audio feature strongly predicts popularity** (max |r| = 0.13). The primary driver is **genre** (27× spread). Many conventional "hit-making" hypotheses (loudness, dance+energy, acousticness penalty) show only weak marginal effects in this balanced dataset.
+**Critical Note**: The analysis reveals that **no single audio feature strongly predicts popularity** (max |r| ≈ 0.13, instrumentalness). The primary driver is **genre** (27× spread). Many conventional "hit-making" hypotheses (loudness, dance+energy, acousticness penalty) show only weak marginal effects in this balanced dataset. Streaming popularity is driven by genre, marketing, artist brand, and playlist placement — not by mastering louder or pushing danceability/energy.
 
 ---
 
 ## INSIGHT 1: No Audio Feature Is a Strong Popularity Predictor
 
-**Finding**: The highest Pearson correlation with popularity is **loudness at r = +0.072** (weak). Danceability (+0.064), Energy (+0.014), and all other features are negligible (|r| < 0.13). Loudness is **not** a "dominant predictor" as sometimes claimed.
-
-**Business Context**: Streaming popularity is driven by genre, marketing, artist brand, and playlist placement — not by mastering louder or pushing danceability/energy. The "loudness wars" narrative is overstated in this data.
+**Finding**: The highest Pearson correlation with popularity is **loudness at r = +0.072** (weak). Danceability (+0.064), Energy (+0.014), and all other features are negligible (|r| < 0.13). Loudness is **not** a "dominant predictor" as sometimes claimed. Streaming popularity is driven by genre, marketing, artist brand, and playlist placement — not by mastering louder or pushing danceability/energy.
 
 **Recommendations**:
 - **A&R**: Stop using loudness/energy/danceability as screening signals for commercial potential
@@ -45,7 +44,7 @@ This report translates data-backed insights from the Spotify Tracks EDA into **a
 
 ## INSIGHT 3: Acousticness Has Only a Weak Negative Association
 
-**Finding**: Acousticness correlates **r = -0.039** with popularity — not -0.31. Tracks with acousticness > 0.8 average ~4 points lower, not 15. The penalty is real but small.
+**Finding**: Acousticness correlates **r = -0.039** with popularity. Tracks with acousticness > 0.8 average ~4 points lower. The penalty is real but small.
 
 **Business Context**: Acoustic/folk/indie artists are modestly disadvantaged by popularity-centric algorithms, but the gap is bridgeable via playlist strategy and sync.
 
@@ -73,7 +72,7 @@ This report translates data-backed insights from the Spotify Tracks EDA into **a
 
 ## INSIGHT 5: Speechiness (Rap/Spoken Word) Has Weak Negative Correlation
 
-**Finding**: Speechiness correlates **r = -0.12** with popularity. High-speech tracks (>0.5) are typically rap verses/interludes with lower crossover appeal.
+**Finding**: Speechiness correlates **r = -0.047** with popularity. High-speech tracks (>0.5) are typically rap verses/interludes with lower crossover appeal.
 
 **Business Context**: Hip-hop dominates culture but verse-heavy tracks struggle on pop-leaning algorithmic playlists.
 
@@ -87,7 +86,7 @@ This report translates data-backed insights from the Spotify Tracks EDA into **a
 
 ## INSIGHT 6: Valence (Positivity) Has Negligible Direct Commercial Impact
 
-**Finding**: Valence correlates only **r = +0.08** with popularity. Both happy and sad songs achieve equal popularity ceilings.
+**Finding**: Valence correlates only **r = -0.012** with popularity — effectively zero. Both happy and sad songs achieve equal popularity ceilings.
 
 **Business Context**: "Write happy songs for hits" is a myth. Emotional authenticity > forced positivity.
 
@@ -171,7 +170,7 @@ This report translates data-backed insights from the Spotify Tracks EDA into **a
 
 ## INSIGHT 12: Liveness (Live Feel) Weakly Negatively Correlates with Streaming Popularity
 
-**Finding**: Liveness **r = -0.09**. High-liveness tracks (>0.8) average modestly lower popularity.
+**Finding**: Liveness **r = -0.014** — negligible. There is no meaningful popularity difference between live-feeling and studio recordings.
 
 **Business Context**: Streaming favors studio polish. Live recordings serve different purpose.
 
@@ -261,6 +260,21 @@ This report translates data-backed insights from the Spotify Tracks EDA into **a
 | #3 Acoustic | Acoustic vertical playlist followers | Sync revenue / wellness app deals |
 | #4 Instrumental | Functional playlist hours streamed | Session duration / retention |
 | #16 Temporal | API enrichment coverage % | Trend detection lead time (weeks) |
+
+---
+
+## Overall Recommendations
+
+| Priority | Theme | Recommendation | Owner | Timeline |
+|----------|-------|----------------|-------|----------|
+| **P0** | Data foundation | Enrich all tracks with `release_date` via Spotify API | Data Engineering | Week 1 |
+| **P0** | Fair benchmarking | Deploy genre-normalized popularity (z-score within genre) | Analytics | Week 2 |
+| **P1** | A&R process | Retire loudness/energy/danceability as screening signals | A&R / Analytics | Month 1 |
+| **P1** | Content strategy | Strengthen Acoustic/Instrumental functional verticals (sync, wellness) | Content | Month 2 |
+| **P2** | Measurement | Unify Energy/Loudness into a single "Production Intensity" KPI | ML Engineering | Month 2 |
+| **P2** | Playlist | Build "Bars & Hooks" rap crossover vertical | Genre Lead | Month 3 |
+| **P2** | Market context | Apply market-share weights before executive reporting | Analytics | Month 3 |
+| **P3** | Release ops | Standardise live-content release strategy | Release Ops | Quarter 1 |
 
 ---
 

@@ -2,7 +2,7 @@
 
 **Generated**: 2026-11-07  
 **Dataset**: Spotify Tracks (114,000 rows × 21 columns)  
-**Author**: Senior Data Science Team
+**Author**: Student Intern
 
 ---
 
@@ -51,7 +51,19 @@
 ### 2.6 Genre Balance
 - 113 genres × ~1,000 tracks each in the raw dataset (curated balanced dataset)
 - Not representative of real Spotify market distribution
-- **Flagged** for business interpretation caveat
+- See the **Caveats** section (§6) for how this affects interpretation
+
+---
+
+### 2.7 Engineered Columns
+
+Three new columns were created during cleaning (raw 21 − 1 dropped index + 3 engineered = 23 columns after cleaning):
+
+| New Column | Source | Purpose |
+|---|---|---|
+| `duration_min` | `duration_ms` / 60,000 | Human-readable track length in minutes |
+| `key_name` | `key` (0–11) mapped via `KEY_NAMES` | Musical key as a label (C, C#, D, …) |
+| `dance_energy_group` | `danceability` × `energy` thresholds | Interaction group for the ANOVA (Low Both / High Dance–Low Energy / Low Dance–High Energy / High Both) |
 
 ---
 
@@ -73,17 +85,13 @@ df = df.drop_duplicates(subset=['track_id'], keep='first')
 
 # 5. Feature engineering
 df['duration_min'] = df['duration_ms'] / 60000.0
-df['duration_sec'] = df['duration_ms'] / 1000.0
 
 # 6. Key mapping (0-11 → C, C#, D...)
 key_map = {0:'C', 1:'C#', 2:'D', 3:'D#', 4:'E', 5:'F', 
            6:'F#', 7:'G', 8:'G#', 9:'A', 10:'A#', 11:'B'}
 df['key_name'] = df['key'].map(key_map)
 
-# 7. Mode mapping (0/1 → Minor/Major)
-df['mode_name'] = df['mode'].map({0:'Minor', 1:'Major'})
-
-# 8. Interaction feature: Danceability × Energy
+# 7. Interaction feature: Danceability × Energy
 df['dance_energy_group'] = 'Low Both'
 df.loc[(df['danceability'] > 0.6) & (df['energy'] > 0.6), 'dance_energy_group'] = 'High Both'
 df.loc[(df['danceability'] > 0.6) & (df['energy'] <= 0.6), 'dance_energy_group'] = 'High Dance / Low Energy'
@@ -97,7 +105,7 @@ df.loc[(df['danceability'] <= 0.6) & (df['energy'] > 0.6), 'dance_energy_group']
 | Metric | Before | After | Change |
 |--------|--------|-------|--------|
 | **Rows** | 114,000 | 89,740 | -24,260 (-21.3%) |
-| **Columns** | 21 | 24 | +3 (engineered) |
+| **Columns** | 21 | 23 | +2 net (+3 engineered, −1 dropped index) |
 | **Missing Values** | 3 | 0 | -3 |
 | **Duplicate track_ids** | 24,259 | 0 | -24,259 |
 | **Memory Usage** | ~25 MB | ~20 MB | -5 MB |
@@ -112,7 +120,7 @@ df.loc[(df['danceability'] <= 0.6) & (df['energy'] > 0.6), 'dance_energy_group']
 - ✅ **Popularity range**: 0–100 (full scale)
 - ✅ **All audio features** in valid ranges (0–1 for normalized, dB for loudness)
 - ✅ **Explicit flag**: Boolean (91.4% False, 8.6% True)
-- ✅ **New features**: duration_min, key_name, mode_name, dance_energy_group
+- ✅ **New features**: duration_min, key_name, dance_energy_group
 
 ---
 

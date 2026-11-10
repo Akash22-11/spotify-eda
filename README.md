@@ -2,11 +2,13 @@
 
 An exploratory data analysis of 114,000 tracks from the Spotify Tracks Dataset, looking at how audio features, genres, and track characteristics relate to track popularity.
 
+For a concise overview of the findings, business implications, and recommended next steps, see the [Executive Summary](reports/executive_summary.md).
+
 ---
 
 ## Key findings
 
-- **Audio features barely correlate with popularity** — contrary to common intuition, no single feature (danceability, energy, loudness, tempo) predicts popularity on its own. Loudness has the highest positive correlation, but it's weak (`r = +0.07`).
+- **Audio features barely correlate with popularity** — contrary to common intuition, no single feature (danceability, energy, loudness, tempo) predicts popularity on its own. Loudness has the highest positive correlation, but it's weak (`r ≈ 0.07`).
 - **Production intensity shows internal structure, not popularity** — Loudness and Energy correlate strongly with each other (`r = +0.76`), and both inversely with Acousticness (`r = -0.73`), reflecting production style rather than track success.
 - **Genre dominates track popularity** — average popularity varies widely by genre. K-pop (59.4 avg), Pop-film (59.1), and Metal (56.4) sit at the top, while Romance (3.5) and Iranian (2.2) sit at the bottom.
 - **Explicit content gets a small boost** — ~8.6% of tracks are explicit, averaging a 36.9 popularity score compared to 32.9 for clean tracks.

@@ -2,7 +2,7 @@
 
 **Generated**: 2026-11-08  
 **Dataset**: Spotify Tracks (89,740 cleaned tracks, 113 genres)  
-**Author**: Senior Data Science Team
+**Author**: Student Intern
 
 ---
 
@@ -201,18 +201,20 @@ Cannot perform:
 
 ## 8. Visualizations Generated
 
+All plots are saved to `visuals/` at 300 DPI and are also referenced by the interactive dashboard in `dashboard/`.
+
 | File | Description | Section |
 |------|-------------|---------|
-| 01_popularity_distribution.png | Hist + KDE + Box | Univariate |
-| 02_top_genres_count.png | Count + % bars | Univariate |
-| 03_audio_features_distribution.png | 8×grid hist+KDE | Univariate |
-| 04_popularity_vs_audio_features.png | 6×reg plots | Bivariate |
-| 05_genre_vs_popularity_violin.png | Violin + Box | Bivariate |
-| 06_correlation_heatmap.png | 13×13 annotated | Multivariate |
-| 07_key_features_pairplot.png | 5×5 scatter matrix | Multivariate |
-| 08_dance_energy_interaction.png | Box + Violin | Bivariate |
-| 09_explicit_vs_popularity.png | Box plot | Bivariate |
-| 10_top_genres_by_avg_popularity.png | Top 15 bar | Bivariate |
+| [01_popularity_distribution.png](visuals/01_popularity_distribution.png) | Hist + KDE + Box | Univariate |
+| [02_top_genres_count.png](visuals/02_top_genres_count.png) | Count + % bars | Univariate |
+| [03_audio_features_distribution.png](visuals/03_audio_features_distribution.png) | 8×grid hist+KDE | Univariate |
+| [04_popularity_vs_audio_features.png](visuals/04_popularity_vs_audio_features.png) | 6×reg plots | Bivariate |
+| [05_genre_vs_popularity_violin.png](visuals/05_genre_vs_popularity_violin.png) | Violin + Box | Bivariate |
+| [06_correlation_heatmap.png](visuals/06_correlation_heatmap.png) | 13×13 annotated | Multivariate |
+| [07_key_features_pairplot.png](visuals/07_key_features_pairplot.png) | 5×5 scatter matrix | Multivariate |
+| [08_dance_energy_interaction.png](visuals/08_dance_energy_interaction.png) | Box + Violin | Bivariate |
+| [09_explicit_vs_popularity.png](visuals/09_explicit_vs_popularity.png) | Box plot | Bivariate |
+| [10_top_genres_by_avg_popularity.png](visuals/10_top_genres_by_avg_popularity.png) | Top 15 bar | Bivariate |
 
 ---
 
@@ -227,7 +229,18 @@ Cannot perform:
 
 ---
 
-## 10. Recommended Next Analyses
+## 10. Limitations
+
+1. **Balanced-genre sample** — the cleaned dataset holds ~794 tracks per genre (113 genres). This is a *curated* balance, not the real Spotify market distribution, so genre-level comparisons are **comparative only**. Apply market-share weights before generalising to the whole platform.
+2. **No temporal data** — the dataset has no `release_date` column, so it is a single cross-sectional snapshot. Nothing here can speak to trends, seasonality, genre evolution, or artist career trajectories (see Section 6).
+3. **Proprietary popularity score** — Spotify's popularity algorithm is undisclosed, so the 0–100 scores are a relative ranking, not an absolute measure of popularity.
+4. **Audio features are model estimates** — danceability, energy, loudness, etc. are ML-model outputs, not ground-truth measurements, and carry inherent estimation error.
+5. **Artist names not disambiguated** — the `artists` column uses semicolon-separated names for collaborations, so artist-level aggregation requires parsing first.
+6. **Correlations are associations, not causes** — no audio feature *causes* popularity; the reported relationships are descriptive only.
+
+---
+
+## 11. Recommended Next Analyses
 
 | Priority | Analysis | Method |
 |----------|----------|--------|
