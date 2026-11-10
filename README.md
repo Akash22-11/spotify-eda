@@ -22,17 +22,17 @@ For a concise overview of the findings, business implications, and recommended n
 
 ```
 .
-├── build_eda_assets.py        # Python script that generates all visuals and the dashboard
-├── requirements.txt           # Environment requirements
+├── build_eda_assets.py        
+├── requirements.txt           
 ├── README.md
 │
 ├── data/
-│   └── spotify.csv            # Raw dataset (114,000 tracks)
+│   └── spotify.csv           
 │
 ├── notebooks/
-│   └── spotify_eda.ipynb      # Complete exploratory notebook
+│   └── spotify_eda.ipynb      
 │
-├── visuals/                   # Generated PNG plots (300 DPI)
+├── visuals/                   
 │   ├── 01_popularity_distribution.png
 │   ├── 02_top_genres_count.png
 │   ├── 03_audio_features_distribution.png
@@ -45,9 +45,9 @@ For a concise overview of the findings, business implications, and recommended n
 │   └── 10_top_genres_by_avg_popularity.png
 │
 ├── dashboard/
-│   └── spotify_dashboard.html # Interactive Plotly dashboard
+│   └── spotify_dashboard.html 
 │
-└── reports/                   # Detailed written summaries
+└── reports/                  
     ├── data_cleaning_report.md
     ├── eda_report.md
     ├── business_insights_report.md
