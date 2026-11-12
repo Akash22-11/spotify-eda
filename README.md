@@ -78,7 +78,6 @@ For a concise overview of the findings, business implications, and recommended n
 | `tempo` | 0 – 243 BPM | 122 BPM | Median 122 BPM |
 
 ---
-
 ## Reproducing the analysis
 
 ### Setup
