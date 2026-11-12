@@ -7,7 +7,6 @@ For a concise overview of the findings, business implications, and recommended n
 > **Note on dataset balance**: The cleaned dataset contains ~794 tracks per genre (113 genres). This is a **balanced sample** designed for fair cross-genre comparison and **does not reflect Spotify's natural catalog distribution**. Apply market-share weights before generalizing insights.
 
 ---
-
 ## Key findings
 
 - **Audio features barely correlate with popularity** — contrary to common intuition, no single feature (danceability, energy, loudness, tempo) predicts popularity on its own. Loudness has the highest positive correlation, but it's weak (`r ≈ 0.07`).
