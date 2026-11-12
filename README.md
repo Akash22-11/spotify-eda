@@ -52,7 +52,6 @@ For a concise overview of the findings, business implications, and recommended n
     ├── business_insights_report.md
     └── executive_summary.md
 ```
-
 ---
 
 ## Dataset summary
