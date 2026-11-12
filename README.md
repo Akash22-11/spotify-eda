@@ -5,7 +5,6 @@ An exploratory data analysis of 114,000 tracks from the Spotify Tracks Dataset, 
 For a concise overview of the findings, business implications, and recommended next steps, see the [Executive Summary](reports/executive_summary.md).
 
 > **Note on dataset balance**: The cleaned dataset contains ~794 tracks per genre (113 genres). This is a **balanced sample** designed for fair cross-genre comparison and **does not reflect Spotify's natural catalog distribution**. Apply market-share weights before generalizing insights.
-
 ---
 ## Key findings
 
