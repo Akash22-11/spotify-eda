@@ -38,7 +38,6 @@ CAT_PALETTE = [
     '#e34948',  # red
 ]
 
-# Sequential palette for heatmaps/continuous (single blue hue, light -> dark)
 SEQ_PALETTE = ['#cde2fb', '#b7d3f6', '#9ec5f4', '#86b6ef', '#6da7ec',
                '#5598e7', '#3987e5', '#2a78d6', '#1c5cab', '#104281']
 
