@@ -105,7 +105,6 @@ print("Loading dataset...")
 df_raw = pd.read_csv(DATA_PATH)
 print(f"Raw Shape: {df_raw.shape}")
 
-# Drop unnamed index column if present
 if 'Unnamed: 0' in df_raw.columns:
     df_raw = df_raw.drop(columns=['Unnamed: 0'])
 
