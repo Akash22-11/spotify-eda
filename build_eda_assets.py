@@ -10,7 +10,7 @@ import seaborn as sns
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-# ─── Visual Design System ───
+# Visual Design System 
 
 SPOTIFY_GREEN = '#008300'        # brand / primary accent (distribution, bars)
 SPOTIFY_GREEN_DARK = '#006300'   # darker step of the same green
