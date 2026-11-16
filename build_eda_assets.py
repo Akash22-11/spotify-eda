@@ -133,7 +133,7 @@ def format_thousands(x, pos):
         return f'{x/1e3:.0f}K'
     return f'{x:.0f}'
 
-# ─── 1. Popularity Analysis Plots ───
+#  1. Popularity Analysis Plots 
 fig, axes = plt.subplots(1, 3, figsize=(18, 5.5), constrained_layout=True)
 
 # Histogram + KDE
@@ -166,7 +166,7 @@ add_annotation(axes[1], "Most of the catalog sits\nbelow a modest score;\nonly a
 
 # Box plot
 sns.boxplot(x=df_clean['popularity'], ax=axes[2], color=SPOTIFY_GREEN, width=0.5,
-            flierprops={'marker': 'o', 'markerfacecolor': ACCENT_RED, 'markersize': 3, 'alpha': 0.4})
+            flierprops={'marker': 'o', 'markerfacecolor': ACCENT_RED, 'markersize': 3, 'alpha': 0.4}
 axes[2].set_title("Popularity — Quartiles & Outliers", fontsize=TITLE_SIZE)
 axes[2].set_xlabel("Popularity Score (0–100)")
 add_annotation(axes[2], f"Q1: {df_clean['popularity'].quantile(0.25):.0f}\nMedian: {df_clean['popularity'].median():.0f}\nQ3: {df_clean['popularity'].quantile(0.75):.0f}\nIQR: {df_clean['popularity'].quantile(0.75) - df_clean['popularity'].quantile(0.25):.0f}")
