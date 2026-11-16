@@ -12,16 +12,16 @@ from plotly.subplots import make_subplots
 
 # Visual Design System 
 
-SPOTIFY_GREEN = '#008300'        # brand / primary accent (distribution, bars)
-SPOTIFY_GREEN_DARK = '#006300'   # darker step of the same green
+SPOTIFY_GREEN = '#008300'        
+SPOTIFY_GREEN_DARK = '#006300'  
 ACCENT_BLUE = '#2a78d6'          # bivariate scatter / regression lines
 ACCENT_RED = '#e34948'           # alert / negative (outliers, explicit tracks, mean lines)
-ACCENT_ORANGE = '#eb6834'        # highlight (top-ranked bars, best dance/energy group)
+ACCENT_ORANGE = '#eb6834'    
 ACCENT_AQUA = '#1baf7a'          # clean / neutral category (clean tracks, mean line)
 ACCENT_VIOLET = '#6250d6'        # neutral gray for non-highlighted ranked bars
 NEUTRAL_DARK = '#0b0b0b'         # primary ink
 NEUTRAL_MED = '#52514e'          # secondary ink / axes
-NEUTRAL_LIGHT = '#e1e0d9'        # hairline grid
+NEUTRAL_LIGHT = '#e1e0d9'        
 WHITE = '#FFFFFF'
 BLACK = '#000000'
 
