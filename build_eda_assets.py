@@ -39,7 +39,6 @@ CAT_PALETTE = [
 SEQ_PALETTE = ['#cde2fb', '#b7d3f6', '#9ec5f4', '#86b6ef', '#6da7ec',
                '#5598e7', '#3987e5', '#2a78d6', '#1c5cab', '#104281']
 
-# Diverging palette for correlations (blue <-> red poles, neutral gray midpoint)
 DIV_PALETTE = ['#2a78d6', '#6da7ec', '#b7d3f6', '#f0efec', '#f7f7f7',
                '#fde0ef', '#f4a582', '#e34948', '#b2182B']
 
