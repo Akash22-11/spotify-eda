@@ -26,14 +26,14 @@ WHITE = '#FFFFFF'
 BLACK = '#000000'
 
 CAT_PALETTE = [
-    '#2a78d6',  # blue
-    '#eb6834',  # orange
-    '#1baf7a',  # aqua
-    '#eda100',  # yellow
-    '#e87ba4',  # magenta
-    '#008300',  # green
-    '#6250d6',  # violet
-    '#e34948',  # red
+    '#2a78d6',  
+    '#eb6834',
+    '#1baf7a',  
+    '#eda100',  
+    '#e87ba4',  
+    '#008300',
+    '#6250d6',  
+    '#e34948',  
 ]
 
 SEQ_PALETTE = ['#cde2fb', '#b7d3f6', '#9ec5f4', '#86b6ef', '#6da7ec',
