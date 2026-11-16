@@ -11,7 +11,7 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
 # ─── Visual Design System ───
-# Validated reference palette (references/palette.md). One meaning per color;
+
 SPOTIFY_GREEN = '#008300'        # brand / primary accent (distribution, bars)
 SPOTIFY_GREEN_DARK = '#006300'   # darker step of the same green
 ACCENT_BLUE = '#2a78d6'          # bivariate scatter / regression lines
