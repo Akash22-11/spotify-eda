@@ -248,7 +248,7 @@ for i, col in enumerate(audio_cols):
 plt.savefig(VISUALS_DIR / "03_audio_features_distribution.png", dpi=DPI)
 plt.close()
 
-# ─── 4. Bivariate: Popularity vs Audio Features ───
+# 4. Bivariate: Popularity vs Audio Features 
 fig, axes = plt.subplots(2, 3, figsize=(18, 11), constrained_layout=True)
 axes = axes.flatten()
 sample_df = df_clean.sample(5000, random_state=42)
