@@ -93,7 +93,7 @@ sns.set_theme(style="whitegrid", rc={
     'grid.linewidth': 0.8,
 })
 
-# ─── Paths ───
+#  Paths 
 ROOT = pathlib.Path(__file__).resolve().parent
 DATA_PATH = ROOT / "data" / "spotify.csv"
 VISUALS_DIR = ROOT / "visuals"
