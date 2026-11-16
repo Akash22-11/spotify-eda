@@ -25,8 +25,6 @@ NEUTRAL_LIGHT = '#e1e0d9'
 WHITE = '#FFFFFF'
 BLACK = '#000000'
 
-# Categorical palette - the validated 8-slot order. Adjacent CVD Delta E >= 8 in
-# both modes. Never cycle past 8: fold the tail into "Other", facet, or composite.
 CAT_PALETTE = [
     '#2a78d6',  # blue
     '#eb6834',  # orange
